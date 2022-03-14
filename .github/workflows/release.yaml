@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: microsoft
+          java-version: 11
+          cache: gradle
+      - run: |
+          set -x
+
+          ./gradlew --no-daemon jar distZip distTar
+      - uses: actions/upload-artifact@v3
+        with:
+          name: kmspgp-${{ github.event.release.tag_name }}.jar
+          path: build/libs/kmspgp-*.jar
+      - uses: actions/upload-artifact@v3
+        with:
+          name: kmspgp-${{ github.event.release.tag_name }}.zip
+          path: build/distributions/kmspgp-*.zip
+      - uses: actions/upload-artifact@v3
+        with:
+          name: kmspgp-${{ github.event.release.tag_name }}.tar
+          path: build/distributions/kmspgp-*.tar
