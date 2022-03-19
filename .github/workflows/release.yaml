@@ -16,6 +16,7 @@ jobs:
           java-version: 11
           cache: gradle
       - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_RELEASE_NAME: ${{ github.event.release.tag_name }}
         run: |
           set -x
