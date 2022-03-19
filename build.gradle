@@ -65,7 +65,7 @@ task("generateBuildInfo") {
 
     def fileWriter = new FileWriter(file)
 
-    fileWriter.write("object BuildInfo { val version = \"${determineVersion()}\" }")
+    fileWriter.write("object BuildInfo {\n  val version = \"${determineVersion()}\"\n  val commit = \"${System.getenv("GITHUB_SHA") ?: "<snapshot>"}\"\n}")
     fileWriter.flush()
     fileWriter.close()
 }

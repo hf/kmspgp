@@ -22,16 +22,17 @@ jobs:
           set -x
 
           ./gradlew --no-daemon jar distZip
-          
+
           docker run \
             -v $(pwd)/build:/build \
             -w /build \
             -t ghcr.io/graalvm/native-image \
             --no-fallback \
+            --enable-http \
             --enable-https \
             -jar "libs/kmspgp-$GITHUB_RELEASE_NAME.jar" \
-          "kmspgp-$GITHUB_RELEASE_NAME-linux-amd64"
-          
+            "kmspgp-$GITHUB_RELEASE_NAME-linux-amd64"
+
           gh release upload "$GITHUB_RELEASE_NAME" \
             "build/distributions/kmspgp-$GITHUB_RELEASE_NAME.zip" \
             "build/libs/kmspgp-$GITHUB_RELEASE_NAME.jar" \

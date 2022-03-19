@@ -1,10 +1,13 @@
 # KMS for PGP/GPG
 
 This tool allows you to use [AWS KMS][aws-kms] asymmetric keys as if they were
-PGP/GPG keys.
+PGP/GPG keys. (Only for signatures for now.)
 
 This can be useful if you have CI/CD pipelines signing code or artifacts and
 you don't wish to do all the hassle of proper cryptographic key management.
+
+It's also useful if you wish to use AWS CloudHSM keys via the KMS API for
+PGP/GPG operations.
 
 ## How to use?
 
@@ -49,7 +52,7 @@ project specify the following configuration:
 
 ```
 git config --local gpg.program <PATH-TO-KMSPGP>
-git config --local user.signingkey <KMS-KEY-ID>
+git config --local user.signingkey <KMS-KEY-ARN>
 git config --local commit.gpgsign true
 git config --local tag.forceSignAnnotated true
 ```

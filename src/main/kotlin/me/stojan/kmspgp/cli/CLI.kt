@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.subcommands
 
 object CLI {
     val version = BuildInfo.version
+    val commit = BuildInfo.commit
 
     fun run(args: Array<String>) = Root()
         .run {

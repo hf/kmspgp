@@ -40,7 +40,7 @@ object PGP {
                     throw UnsupportedOperationException("ECDSA public key of type '${pubRes.customerMasterKeySpecAsString()}' has SubjectPublicKeyInfo which does not start with 0x04, see https://datatracker.ietf.org/doc/html/rfc5480#section-2.2")
                 }
 
-                BigInteger(this, 1, size - 1)
+                BigInteger(this)
             }
         )
 
