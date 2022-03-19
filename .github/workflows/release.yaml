@@ -15,19 +15,23 @@ jobs:
           distribution: microsoft
           java-version: 11
           cache: gradle
-      - run: |
+      - env:
+          GITHUB_RELEASE_NAME: ${{ github.event.release.tag_name }}
+        run: |
           set -x
 
-          ./gradlew --no-daemon jar distZip distTar
-      - uses: actions/upload-artifact@v3
-        with:
-          name: kmspgp-${{ github.event.release.tag_name }}.jar
-          path: build/libs/kmspgp-*.jar
-      - uses: actions/upload-artifact@v3
-        with:
-          name: kmspgp-${{ github.event.release.tag_name }}.zip
-          path: build/distributions/kmspgp-*.zip
-      - uses: actions/upload-artifact@v3
-        with:
-          name: kmspgp-${{ github.event.release.tag_name }}.tar
-          path: build/distributions/kmspgp-*.tar
+          ./gradlew --no-daemon jar distZip
+          
+          docker run \
+            -v $(pwd)/build:/build \
+            -w /build \
+            -t ghcr.io/graalvm/native-image \
+            --no-fallback \
+            --enable-https \
+            -jar "libs/kmspgp-$GITHUB_RELEASE_NAME.jar" \
+          "kmspgp-$GITHUB_RELEASE_NAME-linux-amd64"
+          
+          gh release upload "$GITHUB_RELEASE_NAME" \
+            "build/distributions/kmspgp-$GITHUB_RELEASE_NAME.zip" \
+            "build/libs/kmspgp-$GITHUB_RELEASE_NAME.jar" \
+            "build/kmspgp-$GITHUB_RELEASE_NAME-linux-amd64"

@@ -2,11 +2,25 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.6.10"
     id "java"
     id "application"
-    id "org.graalvm.buildtools.native" version "0.9.4"
+}
+
+def determineVersion() {
+    def releaseVersion = System.getenv("GITHUB_RELEASE_NAME")
+    def githubSha = System.getenv("GITHUB_SHA")
+
+    if (null != releaseVersion) {
+        return releaseVersion
+    }
+
+    if (null != githubSha) {
+        return githubSha
+    }
+
+    return "1.0-SNAPSHOT"
 }
 
 group "me.stojan.kmspgp"
-version "0.1-SNAPSHOT"
+version determineVersion()
 
 application {
     mainClass = "me.stojan.kmspgp.cli.CLI"
@@ -15,7 +29,8 @@ application {
 jar {
     manifest {
         attributes(
-                "Main-Class": application.mainClass.get()
+                "Main-Class": application.mainClass.get(),
+                "Implementation-Version": determineVersion()
         )
     }
 
@@ -26,7 +41,36 @@ jar {
     exclude "META-INF/*"
     exclude "META-INF/**/*"
     exclude "module-info.class"
+
+    exclude "org/junit/**/*"
+
+    exclude "org/apache/http/**/*"
+
+    exclude "org/bouncycastle/jce/**/*"
+    exclude "org/bouncycastle/jcajce/**/*"
+    exclude "org/bouncycastle/pqc/**/*"
+    exclude "org/bouncycastle/x509/**/*"
+
+    exclude "io/netty/**/*"
 }
+
+task("generateBuildInfo") {
+    def file = new File(projectDir.absoluteFile, "src/main/kotlin/me/stojan/kmspgp/cli/BuildInfo.kt")
+
+    try {
+        file.delete()
+    } catch (ignored) {
+        // do nothing
+    }
+
+    def fileWriter = new FileWriter(file)
+
+    fileWriter.write("object BuildInfo { val version = \"${determineVersion()}\" }")
+    fileWriter.flush()
+    fileWriter.close()
+}
+
+project.tasks.findByName("compileKotlin").dependsOn("generateBuildInfo")
 
 repositories {
     mavenCentral()
@@ -40,7 +84,7 @@ dependencies {
 
     implementation platform("software.amazon.awssdk:bom:2.16.60")
     implementation "software.amazon.awssdk:kms"
-    implementation "software.amazon.awssdk:apache-client"
+    implementation "software.amazon.awssdk:url-connection-client"
 
     implementation "com.github.ajalt.clikt:clikt:3.4.0"
 

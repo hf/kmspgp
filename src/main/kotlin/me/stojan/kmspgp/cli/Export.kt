@@ -6,11 +6,8 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
 import me.stojan.kmspgp.crypto.PGP
-import org.bouncycastle.bcpg.ArmoredOutputStream
-import org.bouncycastle.bcpg.BCPGOutputStream
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest
 import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 
 class Export(val root: Root) : CliktCommand(help = "Export a key's public part as a PGP/GPG value.") {
@@ -68,16 +65,10 @@ class Export(val root: Root) : CliktCommand(help = "Export a key's public part a
             signFn = PGP.signer(kmsClient = root.kmsClient, pubRes = pubRes, desRes = desRes)
         )
 
-        echo(message = String(ByteArrayOutputStream()
-            .also { bytes ->
-                ArmoredOutputStream(bytes).use { armored ->
-                    BCPGOutputStream(armored).use { bcpgout ->
-                        key.encode(bcpgout)
-                        userID.encode(bcpgout)
-                        signature.encode(bcpgout)
-                    }
-                }
-            }
-            .toByteArray()))
+        echo(message = PGP.armor {
+            key.encode(this)
+            userID.encode(this)
+            signature.encode(this)
+        })
     }
 }

@@ -3,12 +3,9 @@ package me.stojan.kmspgp.cli
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import me.stojan.kmspgp.crypto.PGP
-import org.bouncycastle.bcpg.ArmoredOutputStream
-import org.bouncycastle.bcpg.BCPGOutputStream
 import org.bouncycastle.crypto.io.DigestOutputStream
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest
 import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 
 class Sign(val root: Root) : CliktCommand(help = "Sign a message with the provided key.") {
@@ -39,15 +36,8 @@ class Sign(val root: Root) : CliktCommand(help = "Sign a message with the provid
             pubRes = pubRes,
         )
 
-        echo(
-            String(ByteArrayOutputStream()
-                .also { bytes ->
-                    ArmoredOutputStream(bytes).use { armored ->
-                        BCPGOutputStream(armored).use {
-                            signature.encode(it)
-                        }
-                    }
-                }
-                .toByteArray()))
+        echo(message = PGP.armor {
+            signature.encode(this)
+        })
     }
 }

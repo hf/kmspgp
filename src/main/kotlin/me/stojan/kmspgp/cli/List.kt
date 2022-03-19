@@ -55,7 +55,7 @@ class List(val root: Root) : CliktCommand(help = "List all keys usable in PGP/GP
             .toList()
             .sortedBy { (desRes, _, _) -> desRes.keyMetadata().creationDate() }
             .apply {
-                forEachIndexed { index, (desRes, pubRes, pgpKey) ->
+                forEachIndexed { index, (desRes, _, pgpKey) ->
                     echo(desRes.keyMetadata().keyId())
                     echo(
                         "\tFingerprint\t${

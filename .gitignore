@@ -1,3 +1,5 @@
 .gradle
 
 /build
+
+/src/main/kotlin/me/stojan/kmspgp/cli/BuildInfo.kt

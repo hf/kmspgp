@@ -1,5 +1,6 @@
 package me.stojan.kmspgp.crypto
 
+import me.stojan.kmspgp.cli.CLI
 import org.bouncycastle.asn1.pkcs.RSAPublicKey
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
@@ -16,6 +17,7 @@ import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.kms.KmsClient
 import software.amazon.awssdk.services.kms.model.*
+import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.math.BigInteger
 import java.time.Duration
@@ -169,6 +171,8 @@ object PGP {
         signFn = signFn,
         subpacketsFn = {
             setSignatureCreationTime(false, Date.from(now))
+
+            user?.apply { addSignerUserID(false, this) }
         },
         generatorFn = {
             generate()
@@ -272,4 +276,17 @@ object PGP {
                 .build()
         ).signature().asByteArray()
     }
+
+    fun armor(fn: BCPGOutputStream.() -> Unit) = String(
+        ByteArrayOutputStream()
+            .also { bytes ->
+                ArmoredOutputStream(bytes).use { armored ->
+                    armored.clearHeaders()
+                    armored.addHeader("Version", "github.com/hf/kmspgp ${CLI.version}")
+
+                    BCPGOutputStream(armored).use(fn)
+                }
+            }
+            .toByteArray()
+    )
 }
