@@ -124,6 +124,8 @@ object PGP {
                 // https://datatracker.ietf.org/doc/html/rfc4880#section-5.2.3.21
                 setFeature(false, 0x01 or 0x02)
 
+		setKeyFlags(false, 0x03)
+
                 pubRes.signingAlgorithms().map {
                     when (it) {
                         SigningAlgorithmSpec.ECDSA_SHA_256,
